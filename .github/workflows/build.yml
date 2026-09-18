@@ -15,7 +15,8 @@ jobs:
 
     - name: Unzip Workspace
       run: |
-        Expand-Archive -Path FinCoreERP_Enhanced_Workspace.zip -DestinationPath . -Force
+        Expand-Archive -Path FinCoreERP_Enhanced_Workspace.zip -DestinationPath temp_extracted -Force
+        Get-ChildItem -Path temp_extracted\* | Move-Item -Destination . -Force
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
@@ -34,6 +35,16 @@ jobs:
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release ..
         cmake --build . --config Release
+
+    - name: Deploy Qt Libraries
+      run: |
+        windeployqt --release build/Release/FinCoreERP.exe
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: FinCoreERP-Windows-Release
+        path: build/Release/
 
     - name: Deploy Qt Libraries
       run: |
